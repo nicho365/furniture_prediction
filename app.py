@@ -39,17 +39,22 @@ except Exception as e:
 class_names = ['bed', 'chair', 'sofa', 'swivelchair', 'table']
 
 def preprocess_and_predict(image, model):
-    # VGG16 menerima input 224x224
-    img = image.resize((224, 224))
+    # 1. Mendapatkan ukuran yang diharapkan model (misal: (None, 150, 150, 3))
+    # Kita ambil indeks ke-1 (tinggi) dan ke-2 (lebar)
+    input_shape = model.input_shape
+    target_size = (input_shape[1], input_shape[2]) 
+    
+    # 2. Resize gambar secara otomatis mengikuti target_size dari model
+    img = image.resize(target_size)
     img_array = img_to_array(img)
     
-    # Menambah dimensi untuk batch
+    # 3. Menambah dimensi untuk batch (1, tinggi, lebar, 3)
     img_array = np.expand_dims(img_array, axis=0)
     
-    # Normalisasi (Sesuaikan dengan yang Anda lakukan di Colab, umumnya dibagi 255)
+    # 4. Normalisasi (membagi nilai piksel dengan 255)
     img_array = img_array / 255.0
     
-    # Melakukan prediksi
+    # 5. Melakukan prediksi
     predictions = model.predict(img_array)
     predicted_class = class_names[np.argmax(predictions)]
     confidence = np.max(predictions)
