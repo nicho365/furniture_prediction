@@ -8,34 +8,26 @@ import gdown
 import os
 
 # Konfigurasi Halaman (Tab browser)
-st.set_page_config(page_title="Klasifikasi Furniture", page_icon="🛋️", layout="centered")
+st.set_page_config(page_title="Furniture Classfication", layout="centered")
 
-# Menggunakan cache agar model hanya didownload dan diload satu kali
 @st.cache_resource
 def load_model_from_drive():
-    # Ganti dengan File ID Google Drive Anda
     url = f'https://drive.google.com/file/d/1RDWBwvl9EECysd4Kjy6JaSJA0SzYhHs8/view?usp=sharing'
     output_path = 'model_furniture.pkl'
     
-    # Download file dari Google Drive jika belum ada di sistem Streamlit
     if not os.path.exists(output_path):
         with st.spinner("Mengunduh model dari Google Drive (Hanya dilakukan sekali)..."):
             gdown.download(url, output_path, quiet=False)
     
-    # Memuat model menggunakan pickle
     with open(output_path, 'rb') as file:
         model = pickle.load(file)
-        
     return model
 
-# Load model
 try:
     model = load_model_from_drive()
 except Exception as e:
     st.error(f"Gagal memuat model: {e}")
     st.stop()
-
-# Daftar kelas dataset
 class_names = ['bed', 'chair', 'sofa', 'swivelchair', 'table']
 
 def preprocess_and_predict(image, model):
@@ -62,22 +54,22 @@ def preprocess_and_predict(image, model):
     return predicted_class, confidence
 
 # UI Aplikasi
-st.title("🛋️ Deteksi & Klasifikasi Furniture")
-st.write("Aplikasi ini menggunakan model **VGG16** untuk mendeteksi **Bed (Tempat Tidur), Chair (Kursi), Sofa, Swivelchair (Kursi Putar), dan Table (Meja)**.")
+st.title("Furniture Classification")
+st.write("This model prediction use Convolutional Neural Network VGG16 to predict.")
 
 st.markdown("---")
 
-uploaded_file = st.file_uploader("Pilih atau tarik foto furniture ke sini...", type=["jpg", "jpeg", "png"])
+uploaded_file = st.file_uploader("Choose or drag photo file here", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file).convert('RGB')
-    st.image(image, caption='Gambar yang diunggah', use_column_width=True)
+    st.image(image, caption='Uploaded photo', use_column_width=True)
     
     st.write("")
     
-    if st.button("Prediksi Furniture"):
-        with st.spinner("Sedang menganalisis gambar..."):
+    if st.button("Predict"):
+        with st.spinner("Loading..."):
             predicted_class, confidence = preprocess_and_predict(image, model)
             
-            st.success(f"**Hasil Prediksi:** {predicted_class.capitalize()}")
-            st.info(f"**Tingkat Kepercayaan (Confidence):** {confidence:.2%}")
+            st.success(f"Prediction Results: **{predicted_class.capitalize()}**")
+            st.info(f"Confidence level: **{confidence:.2%}**")
