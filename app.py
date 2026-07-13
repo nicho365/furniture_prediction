@@ -1,0 +1,78 @@
+import streamlit as st
+import tensorflow as tf
+from tensorflow.keras.preprocessing.image import img_to_array
+from PIL import Image
+import numpy as np
+import pickle
+import gdown
+import os
+
+# Konfigurasi Halaman (Tab browser)
+st.set_page_config(page_title="Klasifikasi Furniture", page_icon="🛋️", layout="centered")
+
+# Menggunakan cache agar model hanya didownload dan diload satu kali
+@st.cache_resource
+def load_model_from_drive():
+    # Ganti dengan File ID Google Drive Anda
+    url = f'https://drive.google.com/file/d/1RDWBwvl9EECysd4Kjy6JaSJA0SzYhHs8/view?usp=sharing'
+    output_path = 'model_furniture.pkl'
+    
+    # Download file dari Google Drive jika belum ada di sistem Streamlit
+    if not os.path.exists(output_path):
+        with st.spinner("Mengunduh model dari Google Drive (Hanya dilakukan sekali)..."):
+            gdown.download(url, output_path, quiet=False)
+    
+    # Memuat model menggunakan pickle
+    with open(output_path, 'rb') as file:
+        model = pickle.load(file)
+        
+    return model
+
+# Load model
+try:
+    model = load_model_from_drive()
+except Exception as e:
+    st.error(f"Gagal memuat model: {e}")
+    st.stop()
+
+# Daftar kelas dataset
+class_names = ['bed', 'chair', 'sofa', 'swivelchair', 'table']
+
+def preprocess_and_predict(image, model):
+    # VGG16 menerima input 224x224
+    img = image.resize((224, 224))
+    img_array = img_to_array(img)
+    
+    # Menambah dimensi untuk batch
+    img_array = np.expand_dims(img_array, axis=0)
+    
+    # Normalisasi (Sesuaikan dengan yang Anda lakukan di Colab, umumnya dibagi 255)
+    img_array = img_array / 255.0
+    
+    # Melakukan prediksi
+    predictions = model.predict(img_array)
+    predicted_class = class_names[np.argmax(predictions)]
+    confidence = np.max(predictions)
+    
+    return predicted_class, confidence
+
+# UI Aplikasi
+st.title("🛋️ Deteksi & Klasifikasi Furniture")
+st.write("Aplikasi ini menggunakan model **VGG16** untuk mendeteksi **Bed (Tempat Tidur), Chair (Kursi), Sofa, Swivelchair (Kursi Putar), dan Table (Meja)**.")
+
+st.markdown("---")
+
+uploaded_file = st.file_uploader("Pilih atau tarik foto furniture ke sini...", type=["jpg", "jpeg", "png"])
+
+if uploaded_file is not None:
+    image = Image.open(uploaded_file).convert('RGB')
+    st.image(image, caption='Gambar yang diunggah', use_column_width=True)
+    
+    st.write("")
+    
+    if st.button("Prediksi Furniture"):
+        with st.spinner("Sedang menganalisis gambar..."):
+            predicted_class, confidence = preprocess_and_predict(image, model)
+            
+            st.success(f"**Hasil Prediksi:** {predicted_class.capitalize()}")
+            st.info(f"**Tingkat Kepercayaan (Confidence):** {confidence:.2%}")
