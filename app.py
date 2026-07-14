@@ -46,14 +46,14 @@ def predict(image, model):
 st.title("Furniture Classification")
 st.write("This model prediction use Convolutional Neural Network VGG16 to predict.")
 
-with st.expander("Performance Analysis Model (Classification Report)"):
-    st.markdown("""
-    This model was trained using the *VGG16* architecture with Transfer Learning. Here is a summary of the evaluation results:
+st.header("Performance Analysis Model (Classification Report)")
+st.write("""
+This model was trained using the *VGG16* architecture with Transfer Learning. Here is a summary of the evaluation results:
     
     *   Overall accuracy: `95%`
     *   Key Strengths: The model has the highest Precision and Recall scores in the bed and sofa class. This is because the object has a massive shape and very distinctive visual features compared to other categories..
     *   Limitations: This model can make wrong predictions for images that are not furniture or even furniture images.
-    """)
+         """)
 
 st.markdown("---")
 
