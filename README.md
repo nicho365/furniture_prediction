@@ -1,7 +1,7 @@
 # Furniture Image Classification using VGG16
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://furnitureprediction.streamlit.app/)
-[![Open Notebook](https://github.com/nicho365/furniture_prediction/blob/main/training_model.ipynb)](https://github.com/nicho365/furniture_prediction/blob/main/training_model.ipynb)
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://github.com/nicho365/furniture_prediction/blob/main/training_model.ipynb)
 
 ## Project Overview
 This project is a *Computer Vision* implementation using a *Convolutional Neural Network* (CNN) to detect and classify furniture images. The model is trained using the *VGG16* architecture through the *Transfer Learning* method. This application has been publicly deployed with an easy-to-use interactive interface.
