@@ -67,9 +67,17 @@ if uploaded_file is not None:
     
     st.write("")
     
-    if st.button("Predict"):
-        with st.spinner("Loading..."):
+    if st.button("Prediksi Furniture"):
+        with st.spinner("Sedang menganalisis gambar..."):
             predicted_class, confidence = preprocess_and_predict(image, model)
             
-            st.success(f"Prediction Results: **{predicted_class.capitalize()}**")
-            st.info(f"Confidence level: **{confidence:.2%}**")
+            # Tentukan batas minimal (threshold)
+            # Misalnya 0.70 artinya model harus minimal 70% yakin
+            THRESHOLD = 0.70 
+            
+            if confidence < THRESHOLD:
+                st.warning(f"⚠️ **Gambar tidak dikenali!** (Tingkat keyakinan hanya {confidence:.2%})")
+                st.info("Sistem mendeteksi bahwa gambar ini mungkin bukan foto furniture yang valid. Harap pastikan Anda mengunggah foto Bed, Chair, Sofa, Swivelchair, atau Table yang jelas.")
+            else:
+                st.success(f"**Hasil Prediksi:** {predicted_class.capitalize()}")
+                st.info(f"**Tingkat Kepercayaan (Confidence):** {confidence:.2%}")
