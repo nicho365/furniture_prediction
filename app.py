@@ -1,9 +1,9 @@
 import streamlit as st
 import tensorflow as tf
 from tensorflow.keras.preprocessing.image import img_to_array
+from tensorflow.keras.applications.vgg16 import preprocess_input
 from PIL import Image
 import numpy as np
-import pickle
 import gdown
 import os
 
@@ -11,16 +11,14 @@ st.set_page_config(page_title="Furniture Classfication", layout="centered")
 
 @st.cache_resource
 def load_model_from_drive():
-    url = f'https://drive.google.com/file/d/1RDWBwvl9EECysd4Kjy6JaSJA0SzYhHs8/view?usp=sharing'
-    output_path = 'model_furniture.pkl'
-    
+    file_id = '1198o-g9NyAUk398WzCA7fVuruna_1V_V'
+    output_path = 'furniture_vgg16.keras'
+
     if not os.path.exists(output_path):
         with st.spinner("Downloading model...(only for first time)"):
-            gdown.download(url, output_path, quiet=False)
-    
-    with open(output_path, 'rb') as file:
-        model = pickle.load(file)
-    return model
+            gdown.download(id=file_id, output=output_path, quiet=False)
+
+    return tf.keras.models.load_model(output_path)
 
 try:
     model = load_model_from_drive()
@@ -35,9 +33,9 @@ def predict(image, model):
     img = image.resize(target_size)
     img_array = img_to_array(img)    
     img_array = np.expand_dims(img_array, axis=0)    
-    img_array = img_array / 255.0
+    img_array = preprocess_input(img_array)
     
-    predictions = model.predict(img_array)
+    predictions = model.predict(img_array, verbose=0)
     predicted_class = class_names[np.argmax(predictions)]
     confidence = np.max(predictions)
 
@@ -48,7 +46,7 @@ st.write("This model prediction use Convolutional Neural Network VGG16 to predic
 
 st.header("Performance Analysis Model (Classification Report)")
 st.write("This model was trained using the *VGG16* architecture with Transfer Learning. Here is a summary of the evaluation results:")
-st.write("* Overall accuracy: `95%`")
+st.write("* Overall accuracy: `96%`")
 st.write("* Key Strengths: The model has the highest Precision and Recall scores in the bed and sofa class. This is because the object has a massive shape and very distinctive visual features compared to other categories..")
 st.write("* Limitations: This model can make wrong predictions for images that are not furniture or even furniture images.")
 
@@ -66,7 +64,7 @@ uploaded_file = st.file_uploader("Choose or drag photo file here", type=["jpg", 
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file).convert('RGB')
-    st.image(image, caption='Uploaded photo', use_column_width=True)
+    st.image(image, caption='Uploaded photo', use_container_width=True)
     
     st.write("")
     
